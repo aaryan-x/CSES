@@ -1,41 +1,39 @@
-#include<bits/stdc++.h>
+#include <bits/stdc++.h>
 using namespace std;
+const int mod = 1e9 +7;
 
-int main(){
+void fast() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+}
 
+int main() {
+    fast();
     int n, targetSum;
     cin >> n >> targetSum;
     vector<pair<int, int>> v;
-    
-    for (int i = 0; i < n; i++){
+
+    for (int i = 0; i < n; i++) {
         int num;
         cin >> num;
         v.push_back({num, i + 1});
     }
 
     sort(v.begin(), v.end());
-    
     int left = 0, right = n - 1;
-    bool isAnswerPresent = false;
-
-    while (left < right)
-    {
+    while (left < right) {
         int sum = v[left].first + v[right].first;
-        if (sum == targetSum){
+        if (sum == targetSum) {
             cout << v[left].second << " " << v[right].second;
-            isAnswerPresent = true;
-            break;
-        }
-        else if (sum > targetSum){
+            return 0;
+        } else if (sum > targetSum) {
             right--;
-        }
-        else{
+        } else {
             left++;
         }
     }
 
-    if (!isAnswerPresent){
-        cout << "IMPOSSIBLE" << endl;
-    }
+    cout << "IMPOSSIBLE" << endl;
     return 0;
 }
