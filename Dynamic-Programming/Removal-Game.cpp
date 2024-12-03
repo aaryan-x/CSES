@@ -2,13 +2,19 @@
 using namespace std;
 typedef long long int ll;
 
+vector<ll> prefix;
+
+ll sum(ll i, ll j){
+    if(i == 0) return prefix[j];
+    else    return prefix[j] - prefix[i-1];
+}
 void solve(){
     int n;
     cin >> n;
-    vector<ll> a(n), prefix(n); // Prefix Sum Vector
+    prefix.resize(n);
+    vector<ll> a(n);
 
     vector<vector<ll>> dp(n, vector<ll>(n, 0));
-    vector<vector<ll>> sum(n, vector<ll>(n, 0));
     for (int i = 0; i < n; i++){
         cin >> a[i];
         if(i == 0)
@@ -17,22 +23,12 @@ void solve(){
             prefix[i] = a[i] + prefix[i - 1];
     }
 
-
-    // Calculating sum of subarrays from i to j using prefix sum
-    for (int i = 0; i < n; i++){
-        for (int j = i; j < n; j++){
-            if (i == 0)
-                sum[i][j] = prefix[j];
-            else
-                sum[i][j] = prefix[j] - prefix[i - 1];
-        }
-    }
-
     for (int i = n - 1; i >= 0; i--){
         dp[i][i] = a[i];
         for (int j = i + 1; j < n; j++){
-            // dp[i][j] is the total sum from i to j and leaving the minimum sum for player 2
-            dp[i][j] = sum[i][j] - min(dp[i + 1][j], dp[i][j - 1]);
+            ll pickLeft = sum(i, j) - dp[i+1][j];
+            ll pickRight = sum(i, j) - dp[i][j-1];
+            dp[i][j] = max(pickLeft, pickRight);
         }
     }
 
