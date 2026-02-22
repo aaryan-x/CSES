@@ -1,86 +1,82 @@
 #include <bits/stdc++.h>
 using namespace std;
-typedef long long int ll;
 
-struct Direction {
-    int dx, dy;
-    char dir;
-};
+int n, m;
+vector<vector<char>> grid;
+vector<vector<bool>> vis;
 
-bool isValid(int i, int j, int n, int m, vector<vector<char>>& grid, vector<vector<bool>>& vis) {
-    return i >= 0 && i < n && j >= 0 && j < m && grid[i][j] != '#' && !vis[i][j];
-}
+// directions: U, D, R, L
+vector<pair<int,int>> directions = {{-1,0},{1,0},{0,1},{0,-1}};
+vector<char> moves = {'U','D','R','L'};
 
-void solve() {
-    ll n, m;
+int main(){
     cin >> n >> m;
-    
-    int startX = -1, startY = -1;
-    vector<vector<char>> grid(n, vector<char>(m));
-    vector<vector<bool>> vis(n, vector<bool>(m, false));
-    
-    // Directions array: up, down, left, right
-    vector<Direction> directions = {{-1, 0, 'U'}, {1, 0, 'D'}, {0, -1, 'L'}, {0, 1, 'R'}};
-    
-    // Input the grid and locate the start position 'A'
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < m; j++) {
+    grid.assign(n, vector<char>(m));
+    vis.assign(n, vector<bool>(m, false));
+
+    pair<int,int> src, dest;
+
+    for(int i = 0; i < n; i++){
+        for(int j = 0; j < m; j++){
             cin >> grid[i][j];
-            if (grid[i][j] == 'A') {
-                startX = i;
-                startY = j;
-            }
+            if(grid[i][j] == 'A') src = {i, j};
+            if(grid[i][j] == 'B') dest = {i, j};
         }
     }
-    
-    // Parent array to reconstruct the path
-    vector<vector<pair<int, int>>> parent(n, vector<pair<int, int>>(m, {-1, -1}));
-    vector<vector<char>> pathDirection(n, vector<char>(m, '\0'));
 
-    queue<pair<int, int>> q;
-    q.push({startX, startY});
-    vis[startX][startY] = true;
-    
-    while (!q.empty()) {
+    // parent direction used to reach (i,j)
+    vector<vector<int>> parentDir(n, vector<int>(m, -1));
+
+    queue<pair<int,int>> q;
+    q.push(src);
+    vis[src.first][src.second] = true;
+
+    bool found = false;
+
+    while(!q.empty()){
         auto [x, y] = q.front();
         q.pop();
-        
-        if (grid[x][y] == 'B') {
-            // Reconstruct the path
-            string path;
-            while (grid[x][y] != 'A') {
-                path.push_back(pathDirection[x][y]);
-                auto [px, py] = parent[x][y];
-                x = px;
-                y = py;
-            }
-            reverse(path.begin(), path.end());
-            cout << "YES" << endl;
-            cout << path.size() << endl;
-            cout << path << endl;
-            return;
+
+        if(x == dest.first && y == dest.second){
+            found = true;
+            break;
         }
-        
-        // Explore all four directions
-        for (auto& d : directions) {
-            int nx = x + d.dx;
-            int ny = y + d.dy;
-            
-            if (isValid(nx, ny, n, m, grid, vis)) {
-                vis[nx][ny] = true;
-                parent[nx][ny] = {x, y};  // Track where we came from
-                pathDirection[nx][ny] = d.dir;  // Track the direction we took
-                q.push({nx, ny});
-            }
+
+        for(int i = 0; i < 4; i++){
+            int nx = x + directions[i].first;
+            int ny = y + directions[i].second;
+
+            if(nx < 0 || ny < 0 || nx >= n || ny >= m) continue;
+            if(grid[nx][ny] == '#') continue;
+            if(vis[nx][ny]) continue;
+
+            vis[nx][ny] = true;
+            parentDir[nx][ny] = i;   // store move index
+            q.push({nx, ny});
         }
     }
-    
-    cout << "NO" << endl;
-}
 
-int main() {
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-    solve();
+    if(!found){
+        cout << "NO\n";
+        return 0;
+    }
+
+    // Reconstruct path
+    string path;
+    int x = dest.first, y = dest.second;
+
+    while(make_pair(x, y) != src){
+        int d = parentDir[x][y];
+        path.push_back(moves[d]);
+        x -= directions[d].first;
+        y -= directions[d].second;
+    }
+
+    reverse(path.begin(), path.end());
+
+    cout << "YES\n";
+    cout << path.size() << "\n";
+    cout << path << "\n";
+
     return 0;
 }
